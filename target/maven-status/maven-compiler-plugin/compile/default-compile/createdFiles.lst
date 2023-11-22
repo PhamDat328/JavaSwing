@@ -1,0 +1,4 @@
+com\javamidterm\dao\JDBCConnection.class
+com\javamidterm\model\Student.class
+com\javamidterm\main\App.class
+com\javamidterm\dao\StudentDAO.class
