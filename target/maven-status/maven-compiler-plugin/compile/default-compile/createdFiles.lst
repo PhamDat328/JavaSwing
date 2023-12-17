@@ -12,7 +12,6 @@ com\javamidterm\service\UserService.class
 com\javamidterm\model\UserRoles.class
 com\javamidterm\view\UserManagementView$19.class
 com\javamidterm\view\UserManagementView$16.class
-com\javamidterm\main\App.class
 com\javamidterm\model\User.class
 com\javamidterm\view\UserManagementView$8.class
 com\javamidterm\service\StudentService.class

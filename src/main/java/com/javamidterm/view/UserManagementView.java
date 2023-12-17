@@ -1241,18 +1241,18 @@ public class UserManagementView extends javax.swing.JFrame {
         return input != null && input.matches(phonePattern);
     }
 
-    public static void main(String args[]) {
-
-        java.awt.EventQueue.invokeLater(() -> {
-            try {
-                new UserManagementView().setVisible(true);
-
-            } catch (SQLException | ClassNotFoundException ex) {
-                Logger.getLogger(UserManagementView.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//
+//        java.awt.EventQueue.invokeLater(() -> {
+//            try {
+//                new UserManagementView().setVisible(true);
+//
+//            } catch (SQLException | ClassNotFoundException ex) {
+//                Logger.getLogger(UserManagementView.class
+//                        .getName()).log(Level.SEVERE, null, ex);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addStudentBtn;

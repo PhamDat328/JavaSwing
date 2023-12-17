@@ -1,5 +1,6 @@
 package com.javamidterm.view;
 
+import com.javamidterm.dao.JDBCConnection;
 import com.javamidterm.model.User;
 import com.javamidterm.service.UserService;
 import com.javamidterm.service.UserSession;
@@ -167,7 +168,7 @@ public class LoginFrame extends javax.swing.JFrame {
 
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(() -> {
-
+            JDBCConnection.createTables();
             new LoginFrame().setVisible(true);
 
         });
