@@ -1,34 +1,36 @@
 package com.javamidterm.main;
 
+import com.javamidterm.dao.CertificateDAO;
 import com.javamidterm.dao.JDBCConnection;
 import com.javamidterm.dao.StudentDAO;
-import com.javamidterm.model.Student;
+import com.javamidterm.service.DataImporterExporter;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class App {
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        JDBCConnection db = new JDBCConnection();
-        db.createTable();
+//      // Instantiate DAO instances (replace with actual implementations)
+        JDBCConnection.createTables();
         StudentDAO studentDAO = new StudentDAO();
-//        List<String> cers = new ArrayList<>();
-//        cers.add("oop");
-//        cers.add("d&a");
-//        Student s1 = new Student("Ngoc Nam", 22, "0352568244", "Active", cers); 
-//        Student s2 = new Student("Phat Dat", 21, "0333678922", "Active"); 
-//        studentDAO.addStudent(s1);
-//        studentDAO.addStudent(s2);
+        String fileName = "src/main/resources/StudentData.csv";
+//        URL resourceUrl = App.class.getResource();
+//        Path filePath = Paths.get(resourceUrl.getPath());
+        
+         
+        CertificateDAO certificateDAO = new CertificateDAO();
 
-//        List<Student> students = new ArrayList<>();
-//        studentDAO.getAllStudent().forEach(s -> System.out.println(s));
+        // Instantiate DataImporterExporter with DAO instances
+        DataImporterExporter dataImporterExporter = new DataImporterExporter(studentDAO, certificateDAO);
         
-        Student s = new Student("Pham Ngoc Nam", 24, "0123456789", "Active");
-        studentDAO.updateStudent(1, s);
-        
-        Student sUpdated = studentDAO.getStudentById(1);
-        System.out.println(sUpdated);
-        
+        // Example: Import students from a CSV file
+        dataImporterExporter.importStudentsFromFile(fileName);
+
+//         Example: Export students to a CSV file
+//        dataImporterExporter.exportStudentsToCSV("src/main/resources/exported_students.csv");
+        // Example: Import certificates from a CSV file
+//        dataImporterExporter.importCertificatesFromFile("path/to/certificates.csv");
+        // Example: Export certificates to a CSV file
+//        dataImporterExporter.exportCertificatesToCSV("path/to/exported_certificates.csv");
     }
+
 }

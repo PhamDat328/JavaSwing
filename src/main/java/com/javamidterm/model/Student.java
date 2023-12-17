@@ -6,7 +6,7 @@ import java.util.List;
 public class Student {
 
     // Attributes
-    private int studentId; // The unique identifier for the student
+    private int studentId;
     private String name;
     private int age;
     private String phoneNumber;
