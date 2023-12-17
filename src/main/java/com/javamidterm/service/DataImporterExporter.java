@@ -21,7 +21,6 @@ public class DataImporterExporter {
     }
 
     public void importStudentsFromFile(String filePath) {
-        System.out.println("Hello");
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {

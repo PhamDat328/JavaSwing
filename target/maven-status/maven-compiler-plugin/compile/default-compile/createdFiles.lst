@@ -1,3 +1,4 @@
+com\javamidterm\view\UserManagementView$24.class
 com\javamidterm\view\UserManagementView$4.class
 com\javamidterm\view\UserManagementView$14.class
 com\javamidterm\view\LoginFrame.class
@@ -16,11 +17,13 @@ com\javamidterm\model\User.class
 com\javamidterm\view\UserManagementView$8.class
 com\javamidterm\service\StudentService.class
 com\javamidterm\view\UserManagementView$11.class
+com\javamidterm\service\UserSession.class
 com\javamidterm\view\UserManagementView$5.class
 com\javamidterm\view\UserManagementView$3.class
 com\javamidterm\model\Certificate.class
 com\javamidterm\model\Student.class
 com\javamidterm\view\UserManagementView$13.class
+com\javamidterm\view\UserManagementView$23.class
 com\javamidterm\dao\CertificateDAO.class
 com\javamidterm\view\UserManagementView$1.class
 com\javamidterm\view\UserManagementView$7.class
@@ -30,8 +33,10 @@ com\javamidterm\view\UserManagementView$18.class
 com\javamidterm\service\CertificateService.class
 com\javamidterm\view\UserManagementView$12.class
 com\javamidterm\view\UserManagementView$20.class
+com\javamidterm\view\UserManagementView$22.class
 com\javamidterm\view\UserManagementView$10.class
 com\javamidterm\view\UserManagementView$9.class
 com\javamidterm\view\UserManagementView$15.class
+com\javamidterm\view\UserManagementView$25.class
 com\javamidterm\dao\StudentDAO.class
 com\javamidterm\view\LoginFrame$1.class

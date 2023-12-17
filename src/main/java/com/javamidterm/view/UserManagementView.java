@@ -1,9 +1,14 @@
 package com.javamidterm.view;
 
+import com.javamidterm.dao.CertificateDAO;
+import com.javamidterm.dao.StudentDAO;
 import com.javamidterm.model.Student;
 import com.javamidterm.model.User;
+import com.javamidterm.service.DataImporterExporter;
 import com.javamidterm.service.StudentService;
 import com.javamidterm.service.UserService;
+import com.javamidterm.service.UserSession;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +19,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -29,15 +33,38 @@ public class UserManagementView extends javax.swing.JFrame {
     DefaultTableModel studentTableModel;
     User updatedUser;
     Student updatedStudent;
+    UserSession userSession;
+    StudentDAO studentDAO;
+    CertificateDAO certificateDAO;
+    DataImporterExporter dataImporterExporter;
 
     public UserManagementView() throws SQLException, ClassNotFoundException {
 
         initComponents();
-        
+
         ImageIcon originalIcon = new ImageIcon("src/main/resources/user.jpg");
         ImageIcon resizedIcon = resizeImageIcon(originalIcon, 100, 100);
         avatar.setIcon(resizedIcon);
-        
+        userSession = UserSession.getInstance();
+        System.out.println(userSession.isEmployee());
+        if (userSession.isEmployee()) {
+            addStudentBtn.setVisible(false);
+            updateStudentBtn.setVisible(false);
+            deleteStudentBtn.setVisible(false);
+            addUserBtn.setVisible(false);
+            updateUserBtn.setVisible(false);
+            deleteUserBtn.setVisible(false);
+        }
+
+        if (userSession.isManager()) {
+            addUserBtn.setVisible(false);
+            updateUserBtn.setVisible(false);
+            deleteUserBtn.setVisible(false);
+        }
+
+        studentDAO = new StudentDAO();
+        certificateDAO = new CertificateDAO();
+        dataImporterExporter = new DataImporterExporter(studentDAO, certificateDAO);
         userService = new UserService();
 
         defaultTableModel = new DefaultTableModel() {
@@ -79,7 +106,7 @@ public class UserManagementView extends javax.swing.JFrame {
 
         loadStudentData(studentService.getAllStudent());
     }
-    
+
     private static ImageIcon resizeImageIcon(ImageIcon icon, int width, int height) {
         Image image = icon.getImage();
         Image resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
@@ -102,6 +129,9 @@ public class UserManagementView extends javax.swing.JFrame {
         searchBtn1 = new javax.swing.JButton();
         table1 = new javax.swing.JScrollPane();
         studentTable = new javax.swing.JTable();
+        jPanel1 = new javax.swing.JPanel();
+        importBtn = new javax.swing.JButton();
+        exportBtn = new javax.swing.JButton();
         fromPanel1 = new javax.swing.JPanel();
         userInfoLabel1 = new javax.swing.JLabel();
         userFormPanel1 = new javax.swing.JPanel();
@@ -146,6 +176,7 @@ public class UserManagementView extends javax.swing.JFrame {
         updateUserBtn = new javax.swing.JButton();
         deleteUserBtn = new javax.swing.JButton();
         clearFormBtn = new javax.swing.JButton();
+        logoutBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("UserManagementView");
@@ -183,10 +214,10 @@ public class UserManagementView extends javax.swing.JFrame {
         search1Layout.setHorizontalGroup(
             search1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(search1Layout.createSequentialGroup()
-                .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 386, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 415, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(searchBtn1, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
-                .addGap(35, 35, 35))
+                .addContainerGap())
         );
         search1Layout.setVerticalGroup(
             search1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -216,17 +247,64 @@ public class UserManagementView extends javax.swing.JFrame {
         });
         table1.setViewportView(studentTable);
 
+        importBtn.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        importBtn.setText("Import");
+        importBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                importBtnMouseClicked(evt);
+            }
+        });
+        importBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importBtnActionPerformed(evt);
+            }
+        });
+
+        exportBtn.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        exportBtn.setText("Export");
+        exportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(importBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(exportBtn))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(importBtn)
+                    .addComponent(exportBtn))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout listPanel1Layout = new javax.swing.GroupLayout(listPanel1);
         listPanel1.setLayout(listPanel1Layout);
         listPanel1Layout.setHorizontalGroup(
             listPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(listPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(listPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(search1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(table1, javax.swing.GroupLayout.Alignment.LEADING))
-                .addContainerGap())
+                .addGroup(listPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(table1)
+                    .addGroup(listPanel1Layout.createSequentialGroup()
+                        .addGroup(listPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(search1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, listPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(17, 17, 17))
         );
         listPanel1Layout.setVerticalGroup(
             listPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -236,7 +314,9 @@ public class UserManagementView extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(search1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(table1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(table1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -422,10 +502,10 @@ public class UserManagementView extends javax.swing.JFrame {
             studentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(studentLayout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addGroup(studentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(fromPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 407, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(listPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(71, Short.MAX_VALUE))
+                .addGroup(studentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(listPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(fromPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Student", student);
@@ -713,12 +793,22 @@ public class UserManagementView extends javax.swing.JFrame {
                 .addGroup(userLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(userLayout.createSequentialGroup()
                         .addComponent(listPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 71, Short.MAX_VALUE))
+                        .addGap(0, 96, Short.MAX_VALUE))
                     .addComponent(fromPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         jTabbedPane1.addTab("User", user);
+
+        logoutBtn.setBackground(new java.awt.Color(51, 102, 255));
+        logoutBtn.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        logoutBtn.setForeground(new java.awt.Color(255, 255, 255));
+        logoutBtn.setText("Logout");
+        logoutBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logoutBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -727,7 +817,12 @@ public class UserManagementView extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 847, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(logoutBtn)
+                        .addGap(25, 25, 25))
                     .addComponent(jTabbedPane1))
                 .addContainerGap())
         );
@@ -735,7 +830,9 @@ public class UserManagementView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(logoutBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jTabbedPane1)
                 .addContainerGap())
@@ -1006,7 +1103,7 @@ public class UserManagementView extends javax.swing.JFrame {
     }//GEN-LAST:event_ageFieldActionPerformed
 
     private void searchBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtn1ActionPerformed
-        
+
         studentTableModel.setRowCount(0);
 
         String query = searchField.getText();
@@ -1021,7 +1118,7 @@ public class UserManagementView extends javax.swing.JFrame {
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(UserManagementView.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }//GEN-LAST:event_searchBtn1ActionPerformed
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
@@ -1036,6 +1133,64 @@ public class UserManagementView extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
+        // TODO add your handling code here:
+        new LoginFrame().setVisible(true);
+        this.dispose();
+        userSession.setUserInfo("", "");
+    }//GEN-LAST:event_logoutBtnActionPerformed
+
+    private void importBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importBtnActionPerformed
+        // TODO add your handling code here:
+
+
+    }//GEN-LAST:event_importBtnActionPerformed
+
+    private void exportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBtnActionPerformed
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("CSV files (*.csv)", "csv"));
+
+            int result = fileChooser.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+                if (!filePath.toLowerCase().endsWith(".csv")) {
+                    String path = filePath += ".csv"; // Ensure the file has a .csv extension
+                    dataImporterExporter.exportStudentsToCSV(path);
+                }
+
+                JOptionPane.showMessageDialog(this, "CSV file exported successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (HeadlessException e) {
+            JOptionPane.showMessageDialog(this, "Error exporting CSV file", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+
+    }//GEN-LAST:event_exportBtnActionPerformed
+
+    private void importBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_importBtnMouseClicked
+        // TODO add your handling code here:
+        JFileChooser file = new JFileChooser();
+        file.setCurrentDirectory(new File(System.getProperty("user.home")));
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files (*.csv)", "csv");
+        file.addChoosableFileFilter(filter);
+        int output = file.showSaveDialog(file);
+        if (output == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = file.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+
+            dataImporterExporter.importStudentsFromFile(path);
+            try {
+                loadStudentData(studentService.getAllStudent());
+
+            } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(UserManagementView.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }//GEN-LAST:event_importBtnMouseClicked
 
     private void clear() {
         usernameField.setText("");
@@ -1091,8 +1246,10 @@ public class UserManagementView extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> {
             try {
                 new UserManagementView().setVisible(true);
+
             } catch (SQLException | ClassNotFoundException ex) {
-                Logger.getLogger(UserManagementView.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UserManagementView.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         });
     }
@@ -1112,8 +1269,10 @@ public class UserManagementView extends javax.swing.JFrame {
     private javax.swing.JButton deleteStudentBtn;
     private javax.swing.JButton deleteUserBtn;
     private javax.swing.JRadioButton employeeRole;
+    private javax.swing.JButton exportBtn;
     private javax.swing.JPanel fromPanel;
     private javax.swing.JPanel fromPanel1;
+    private javax.swing.JButton importBtn;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -1126,10 +1285,12 @@ public class UserManagementView extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JPanel listPanel;
     private javax.swing.JPanel listPanel1;
     private javax.swing.JRadioButton lockedStatus;
+    private javax.swing.JButton logoutBtn;
     private javax.swing.JRadioButton managerRole;
     private javax.swing.JTextField nameField;
     private javax.swing.JRadioButton normalStatus;
